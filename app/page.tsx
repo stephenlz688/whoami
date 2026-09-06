@@ -17,15 +17,19 @@ export default function Home() {
       <BackgroundOrbs />
       <ScrollProgress />
       <Nav />
-      <main className="wrap">
+      <main>
+        {/* 首屏单独放在 .wrap 之外：它要横向铺满整个视口，不受 1080px 容器限制。
+            内容宽度由 Hero 内部的 .hero-inner 自己锁，跟下方区块保持对齐。 */}
         <Hero />
-        <FocusSection />
-        <ExperienceSection />
-        <SkillsSection />
-        <NotesSection />
-        <AwardsSection />
-        <ContactSection />
-        <SiteFooter />
+        <div className="wrap">
+          <FocusSection />
+          <ExperienceSection />
+          <SkillsSection />
+          <NotesSection />
+          <AwardsSection />
+          <ContactSection />
+          <SiteFooter />
+        </div>
       </main>
       <BackToTop />
     </>

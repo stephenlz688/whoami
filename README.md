@@ -163,6 +163,38 @@ $env:NODE_OPTIONS=""; npm run build
 
 `npm run dev` 同理。已在 Next.js 15.5.24 + Node 22.22.2 验证：清掉变量后编译通过、静态页 4/4 生成、产物正常落盘。
 
+## 首屏视频
+
+首屏背景是一段循环视频，文件在 `public/` 下：
+
+| 文件 | 说明 |
+|---|---|
+| `public/hero.mp4` | 1080p / 30fps / H.264，**890 KB**，时长 2.83 秒，循环播放 |
+| `public/hero-poster.jpg` | 首帧，51 KB。视频没加载完时先显示它，也是 `prefers-reduced-motion` 下的静态兜底 |
+
+原始素材 **281 MB**（`DSC_6015.mov`，ProRes 422 / 4K 3840×2160 / 120fps / 1.44 秒，达芬奇导出）。相机或剪辑软件直出的素材不能直接上网页，压缩后小了约 300 倍。
+
+换素材时重新转码（ffmpeg 在 `D:\tools\node_modules\ffmpeg-static\ffmpeg.exe`）：
+
+```bash
+FF="D:/tools/node_modules/ffmpeg-static/ffmpeg.exe"
+
+# scale 缩到 1080p、fps 取 30 帧、setpts 放慢一倍（1.44s → 2.83s）
+"$FF" -y -i 新素材.mov -an -vf "scale=1920:-2,fps=30,setpts=2.0*PTS" \
+  -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -movflags +faststart public/hero.mp4
+
+"$FF" -y -i 新素材.mov -vf "scale=1920:-2" -frames:v 1 -q:v 4 public/hero-poster.jpg
+```
+
+几个参数的含义：
+
+- `-an` 去掉音轨——**背景视频必须静音才能自动播放**，浏览器不允许带声音自动播
+- `-pix_fmt yuv420p` 保证所有浏览器都能解（ProRes 是 10-bit 422，不转会有兼容问题）
+- `-movflags +faststart` 把索引放文件头部，边下边播，不用等整个文件下载完
+- `setpts` 越大越慢，`2.0` 是一半速度；想更慢改成 `4.0`
+
+**两个坑**：ffmpeg 是原生 Windows 程序，路径要写 `D:/...` 而不是 `/d/...`；`.gitignore` 里没有忽略 mp4，这两个文件会正常提交（加起来不到 1 MB，不影响仓库）。
+
 ## 部署
 
 代码推到 GitHub 后会**自动部署**，不用手动操作。
