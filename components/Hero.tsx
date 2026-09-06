@@ -3,20 +3,27 @@ import Reveal from './Reveal'
 
 export default function Hero() {
   const { headline } = profile
+  // 部署到 GitHub Pages 子路径 /whoami 时由 CI 注入；本地开发为空。
+  // public/ 下的素材是裸的绝对路径，Next 不会自动加 basePath，必须手动拼。
+  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
   return (
     <div className="hero">
       {/* 背景视频：poster 同时作为兜底背景图，视频没加载出来时页面不塌 */}
-      <div className="hero-media" aria-hidden="true">
+      <div
+        className="hero-media"
+        aria-hidden="true"
+        style={{ backgroundImage: `url('${base}/hero-poster.jpg')` }}
+      >
         <video
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
-          poster="/hero-poster.jpg"
+          poster={`${base}/hero-poster.jpg`}
         >
-          <source src="/hero.mp4" type="video/mp4" />
+          <source src={`${base}/hero.mp4`} type="video/mp4" />
         </video>
       </div>
 

@@ -320,7 +320,11 @@ a {
   inset: 0;
   overflow: hidden;
   z-index: 0;
-  background: url('/hero-poster.jpg') center / cover no-repeat;
+  /* 兜底背景图由 Hero.tsx 内联注入（带 basePath 前缀），这里不写死路径 */
+  background-color: #e4eaf1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .hero-media video {
