@@ -1,0 +1,62 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # 允许在 GitHub 网页上手动触发一次
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时触发时只保留最新一次，避免旧构建覆盖新构建
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建静态站点
+        run: npm run build
+        env:
+          # 与仓库名保持一致；改仓库名时这里也要改
+          NEXT_PUBLIC_BASE_PATH: /whoami
+
+      # 关键：不加这个文件，GitHub Pages 的 Jekyll 会忽略 _next 目录，页面样式全丢
+      - name: 生成 .nojekyll
+        run: touch ./out/.nojekyll
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 发布到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
