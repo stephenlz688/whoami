@@ -169,21 +169,27 @@ $env:NODE_OPTIONS=""; npm run build
 
 | 文件 | 说明 |
 |---|---|
-| `public/hero.mp4` | 1080p / 30fps / H.264，**890 KB**，时长 2.83 秒，循环播放 |
-| `public/hero-poster.jpg` | 首帧，51 KB。视频没加载完时先显示它，也是 `prefers-reduced-motion` 下的静态兜底 |
+| `public/hero.mp4` | 720p / 30fps / H.264，**715 KB**，时长 2.80 秒，循环播放 |
+| `public/hero-poster.jpg` | 首帧，47 KB。视频没加载完时先显示它，也是 `prefers-reduced-motion` 下的静态兜底 |
 
-原始素材 **281 MB**（`DSC_6015.mov`，ProRes 422 / 4K 3840×2160 / 120fps / 1.44 秒，达芬奇导出）。相机或剪辑软件直出的素材不能直接上网页，压缩后小了约 300 倍。
+**当前素材**：`video01.mp4`（工作区根目录，421 KB / 720p / 1.49 秒 / 带 AAC 音轨）。
+
+> 更早用的是 `DSC_6015.mov`（281 MB，ProRes 422 / 4K / 120fps，达芬奇导出），已弃用；需要的话在 git 历史里还能找回 `public/hero.mp4` 的旧版本。
 
 换素材时重新转码（ffmpeg 在 `D:\tools\node_modules\ffmpeg-static\ffmpeg.exe`）：
 
 ```bash
 FF="D:/tools/node_modules/ffmpeg-static/ffmpeg.exe"
 
-# scale 缩到 1080p、fps 取 30 帧、setpts 放慢一倍（1.44s → 2.83s）
+# 素材若是相机直出的 .mov：缩到 1080p、30 帧、setpts 放慢一倍
 "$FF" -y -i 新素材.mov -an -vf "scale=1920:-2,fps=30,setpts=2.0*PTS" \
   -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -movflags +faststart public/hero.mp4
 
-"$FF" -y -i 新素材.mov -vf "scale=1920:-2" -frames:v 1 -q:v 4 public/hero-poster.jpg
+# 素材已经是 720p/1080p 的 .mp4：不用 scale，只去音轨 + 放慢一倍
+"$FF" -y -i 新素材.mp4 -an -vf "fps=30,setpts=2.0*PTS" \
+  -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -movflags +faststart public/hero.mp4
+
+"$FF" -y -i 新素材.mp4 -frames:v 1 -q:v 4 public/hero-poster.jpg
 ```
 
 几个参数的含义：
