@@ -25,7 +25,7 @@ export const profile = {
     '也独立写过聊天与网盘系统。喜欢把并发、内存、协议这些事拆开想清楚，再写成能长期跑的代码。',
   specs: [
     { label: '方向', value: 'C/C++ 开发' },
-    { label: '侧重', value: '服务端 · 桌面客户端' },
+    { label: '侧重', value: '服务端 · 桌面客户端 · 中间件' },
     { label: '状态', value: '在职 · 开放交流' },
   ],
 } as const
@@ -53,7 +53,7 @@ export const focusItems: FocusItem[] = [
   {
     icon: 'rabbit',
     title: '系统与性能',
-    desc: '多线程与线程池、gdb 调试、内存泄漏定位。实习期间独立定位并修复了十余个关键 bug。',
+    desc: '座舱域中间件与 Linux 系统编程：用 journald 收集崩溃现场、保障车载日志采集的稳定可用；维护 V4 / V6 多平台、定位并修复线上缺陷。也熟悉多线程、线程池、gdb 与内存泄漏排查。',
   },
 ]
 
@@ -107,7 +107,7 @@ export const skillGroups: SkillGroup[] = [
   {
     kicker: 'Language',
     title: '语言与基础',
-    desc: 'C/C++，面向对象；C++11 新特性（智能指针、强制类型转换）；STL 容器：vector、stack、queue、map。',
+    desc: 'C/C++，面向对象；C++11 新特性（智能指针、强制类型转换）；STL 容器：vector、stack、queue、map。现用于座舱域中间件与服务端开发。',
   },
   {
     kicker: 'Algorithm',
@@ -117,7 +117,7 @@ export const skillGroups: SkillGroup[] = [
   {
     kicker: 'System',
     title: '系统与网络',
-    desc: 'Linux（g++、vim、gdb、ps）；select / poll / epoll；TCP/UDP、HTTP/HTTPS、Socket 编程。',
+    desc: 'Linux（g++、vim、gdb、ps）；系统日志与崩溃收集（journald / coredump）；select / poll / epoll；TCP/UDP、HTTP/HTTPS、Socket 编程；多平台（V4/V6）构建维护与兼容性。',
   },
   {
     kicker: 'Storage',

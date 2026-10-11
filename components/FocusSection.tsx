@@ -9,7 +9,7 @@ export default function FocusSection() {
         <div className="sec-head">
           <div className="sec-label">Focus</div>
           <h2>我做哪一类事</h2>
-          <p>从协议设计到界面实现，中间那几层我都能自己走完。</p>
+          <p>从界面到系统底层，中间那几层我都能自己走完。</p>
         </div>
       </Reveal>
 
