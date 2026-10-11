@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#FFF3E4" />
+      <stop offset="100%" stop-color="#FFE3C4" />
+    </radialGradient>
+    <linearGradient id="mane" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF9A3C" />
+      <stop offset="100%" stop-color="#E8452F" />
+    </linearGradient>
+    <linearGradient id="horn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD98A" />
+      <stop offset="100%" stop-color="#E8A33C" />
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+
+  <!-- 火焰鬃毛：只用椭圆 -->
+  <ellipse cx="22" cy="30" rx="11" ry="13" fill="url(#mane)" />
+  <ellipse cx="42" cy="30" rx="11" ry="13" fill="url(#mane)" />
+  <ellipse cx="32" cy="21" rx="12" ry="10" fill="url(#mane)" />
+
+  <!-- 金角 -->
+  <ellipse cx="24" cy="10" rx="3.4" ry="6.5" fill="url(#horn)" transform="rotate(-20 24 10)" />
+  <ellipse cx="40" cy="10" rx="3.4" ry="6.5" fill="url(#horn)" transform="rotate(20 40 10)" />
+
+  <!-- 头 -->
+  <ellipse cx="32" cy="38" rx="14" ry="13" fill="#FFF6EC" />
+
+  <!-- 吻部 -->
+  <ellipse cx="32" cy="46" rx="7.5" ry="6" fill="#FFF0E2" />
+
+  <!-- 鼻 -->
+  <ellipse cx="32" cy="43.5" rx="2.6" ry="1.9" fill="#3D4A57" />
+
+  <!-- 眼睛 -->
+  <ellipse cx="25.5" cy="37" rx="2.2" ry="2.6" fill="#3D4A57" />
+  <ellipse cx="38.5" cy="37" rx="2.2" ry="2.6" fill="#3D4A57" />
+
+  <!-- 腮红 -->
+  <ellipse cx="21.5" cy="42.5" rx="3" ry="2" fill="#EFA8B2" opacity="0.55" />
+  <ellipse cx="42.5" cy="42.5" rx="3" ry="2" fill="#EFA8B2" opacity="0.55" />
+</svg>
