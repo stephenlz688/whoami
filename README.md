@@ -19,7 +19,31 @@ npm run dev
 npm run build   # 类型检查 + 静态导出，产物在 out/
 ```
 
-> 项目配了 `output: 'export'`，构建产物是纯静态文件，**没有 `npm run start`**（那是 Node 服务器模式才有的）。想本地预览产物，用任意静态服务器，例如 `npx serve out`。
+> 项目配了 `output: 'export'`，构建产物是纯静态文件，**没有 `npm run start`**（那是 Node 服务器模式才有的）。
+
+### 预览构建产物：必须用 serve_out.py，不能直接 serve out
+
+构建时 CI 注入 `NEXT_PUBLIC_BASE_PATH=/whoami`，所以 `out/index.html` 里所有
+资源引用都带 `/whoami` 前缀：
+
+```html
+<link rel="stylesheet" href="/whoami/_next/static/css/xxx.css">
+```
+
+如果直接 `npx serve out` 或 `python -m http.server -d out`，服务根目录就是 `out/`，
+页面去请求 `/whoami/_next/...` 会**全部 404** —— 表现为页面没有任何样式、
+JS 不执行、布局全乱，和「站点坏了」一模一样。
+
+用工作区根目录的 `serve_out.py`，它重写 `translate_path` 把 `/whoami/xxx`
+映射到 `out/xxx`，与线上结构一致：
+
+```bash
+python ../serve_out.py 3001
+# 打开 http://127.0.0.1:3001/whoami/
+```
+
+> 注意：`http.server` **不跟随目录符号链接**，所以靠symlink/junction 模拟子路径
+> 是无效的，必须走 `translate_path` 映射。
 
 ## 需要什么环境
 
