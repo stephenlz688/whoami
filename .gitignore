@@ -7,3 +7,7 @@ build/
 next-env.d.ts
 .DS_Store
 .env*.local
+
+# 仅本地使用，不上传到 GitHub
+README.md
+.local-docs/
