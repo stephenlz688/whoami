@@ -1126,16 +1126,16 @@ h1 em {
 
 /* ============================================================
    20. 3D pet (hero mascot, real GLB model)
-   model-viewer handles camera controls; drag to rotate.
-   Bundle and model are served locally from public/.
+   Self-written three.js renderer; no CDN, no web component.
+   Canvas is appended by QilinPet.tsx at runtime.
    ============================================================ */
 .pet3d {
   position: absolute;
   right: 3.5%;
   bottom: 78px;
   z-index: 2;
-  width: 176px;
-  height: 210px;
+  width: 190px;
+  height: 224px;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.6s var(--ease);
@@ -1143,18 +1143,19 @@ h1 em {
 .pet3d.is-ready {
   opacity: 1;
   visibility: visible;
+  cursor: grab;
+  /* 只在模型范围内响应事件，不影响周围内容点击 */
+  pointer-events: auto;
 }
 
-.pet3d-mv {
+/* three.js 注入的 canvas：尺寸和光标在组件里用内联样式设好 */
+.pet3d canvas {
   display: block;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  cursor: grab;
-  --poster-color: transparent;
-  --progress-bar-color: var(--accent);
+  outline: none;
 }
-.pet3d-mv:active {
+/* 拖动时整块区域都算命中区，手指/光标不必精确落在模型上 */
+.pet3d.is-grabbing,
+.pet3d.is-grabbing canvas {
   cursor: grabbing;
 }
 

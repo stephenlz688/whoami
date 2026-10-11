@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>小麒麟 3D 模型 · 可拖动查看</title>
+<title>火麒麟 3D 模型 · 可拖动查看</title>
 <style>
   html,body{margin:0;height:100%;background:#f2f5f8;color:#3d4a57;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}
@@ -11,30 +11,110 @@
   h1{margin:0;font-size:18px;font-weight:500;letter-spacing:.04em}
   p{margin:6px 0 0;font-size:13px;color:#9aa7b4}
   .stage{flex:1;min-height:0;position:relative}
-  model-viewer{display:block;width:100%;height:100%;background:transparent;
-    cursor:grab;--poster-color:transparent;--progress-bar-color:#7fa3c9;touch-action:none}
-  model-viewer:active{cursor:grabbing}
+  #mv{position:absolute;inset:0}
+  canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none;outline:none}
   .tip{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);
     padding:6px 14px;border:1px solid rgba(255,255,255,.85);border-radius:999px;
     background:rgba(255,255,255,.6);backdrop-filter:blur(14px) saturate(1.25);
     color:#6b7a8a;font-size:12px;letter-spacing:.04em;pointer-events:none}
-  a{color:#7fa3c9}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>小麒麟 · 3D 模型</h1>
-    <p>拖动旋转 · 滚轮缩放 · 约 186 KB · 来源：文生 3D（model-viewer 渲染）</p>
+    <h1>火麒麟 · 3D 模型</h1>
+    <p>拖动旋转 · 滚轮缩放 · 约 190 KB · 自写 three.js 渲染，零 CDN 依赖</p>
   </header>
   <div class="stage">
-    <model-viewer src="qilin.glb" alt="一只可爱的薄荷绿小麒麟手办"
-      camera-controls auto-rotate rotation-per-second="18deg"
-      camera-orbit="35deg 72deg 105%" shadow-intensity="0.5" shadow-softness="0.9"
-      exposure="1.05" environment-image="neutral" interaction-prompt="none"></model-viewer>
-    <span class="tip">按住拖动转一转</span>
+    <div id="mv"></div>
+    <span class="tip" id="tip">正在唤醒…</span>
   </div>
 </div>
-<script src="model-viewer.min.js"></script>
+<script type="module">
+  const host = document.getElementById('mv');
+  const tip = document.getElementById('tip');
+  const fail = m => { tip.textContent = m; tip.style.color = '#d85a30'; };
+
+  try {
+    const THREE = await import('three.module.min.js');
+    const { GLTFLoader } = await import('gltf-loader.js');
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    camera.position.set(0, 0.15, 2.6);
+
+    let renderer;
+    try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+    catch (e) { fail('WebGL 不可用'); throw e; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    host.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xfff2e0, 0.9));
+    const key = new THREE.DirectionalLight(0xfff4e6, 2.1); key.position.set(2, 3, 2); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffb066, 1.5); rim.position.set(-2, 1.2, -1.6); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0xffd9a0, 0.8); fill.position.set(0, -1.5, 1.5); scene.add(fill);
+
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+
+    new GLTFLoader().load('fire-qilin.glb', gltf => {
+      const model = gltf.scene;
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const s = 1.55 / Math.max(size.x, size.y, size.z);
+      model.scale.setScalar(s);
+      const b2 = new THREE.Box3().setFromObject(model);
+      const c = b2.getCenter(new THREE.Vector3());
+      model.position.sub(new THREE.Vector3(c.x, b2.min.y + (size.y * s) / 2, c.z));
+      pivot.add(model);
+      tip.textContent = '按住拖动转一转';
+    }, undefined, () => fail('3D 模型加载失败'));
+
+    let rotY = 0.4, rotX = 0.12, zoom = 2.6, dragging = false, lx = 0, ly = 0, vel = 0;
+    const el = renderer.domElement;
+    el.addEventListener('pointerdown', e => {
+      dragging = true; lx = e.clientX; ly = e.clientY;
+      el.style.cursor = 'grabbing'; el.setPointerCapture(e.pointerId);
+    });
+    el.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly;
+      lx = e.clientX; ly = e.clientY;
+      rotY += dx * 0.011;
+      rotX = Math.max(-0.5, Math.min(0.6, rotX + dy * 0.008));
+      vel = dx * 0.011;
+    });
+    const up = e => {
+      dragging = false; el.style.cursor = 'grab';
+      if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    };
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => {
+      e.preventDefault();
+      zoom = Math.max(1.5, Math.min(4.2, zoom + e.deltaY * 0.0022));
+    }, { passive: false });
+
+    const resize = () => {
+      const w = host.clientWidth || 1, h = host.clientHeight || 1;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+    };
+    resize();
+    new ResizeObserver(resize).observe(host);
+
+    (function loop() {
+      requestAnimationFrame(loop);
+      if (!dragging) { vel *= 0.94; rotY += vel + 0.0035; }
+      pivot.rotation.y = rotY;
+      pivot.rotation.x = rotX;
+      camera.position.z += (zoom - camera.position.z) * 0.12;
+      renderer.render(scene, camera);
+    })();
+  } catch (e) {
+    if (!tip.textContent.includes('失败') && !tip.textContent.includes('不可用')) fail('渲染器加载失败');
+  }
+</script>
 </body>
 </html>
