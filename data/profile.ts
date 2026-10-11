@@ -21,8 +21,8 @@ export const profile = {
     em: '扎实',
   },
   lead:
-    '我是李涛，C/C++ 开发。做过版式文档 SDK 的 API 维护，也独立写过聊天与网盘系统。' +
-    '喜欢把并发、内存、协议这些事拆开想清楚，再写成能长期跑的代码。',
+    '我是李涛，C/C++ 开发，现在做座舱域中间件基础组件。之前维护过 OFD 版式文档 SDK 的 API，' +
+    '也独立写过聊天与网盘系统。喜欢把并发、内存、协议这些事拆开想清楚，再写成能长期跑的代码。',
   specs: [
     { label: '方向', value: 'C/C++ 开发' },
     { label: '侧重', value: '服务端 · 桌面客户端' },
@@ -68,6 +68,17 @@ export type ExperienceItem = {
 }
 
 export const experiences: ExperienceItem[] = [
+  {
+    chip: '在职',
+    title: '座舱域日志中间件 log_service',
+    role: '蜂巢电子科技 · C++ 开发工程师',
+    desc:
+      '负责座舱域中间件基础组件 log_service 的开发与维护，覆盖 V4 / V6 两代平台。' +
+      '基于 journald 实现 coredump 捕获与收集；将日志编号改为 6 位十六进制递增，' +
+      '取代对旧日志的全量 rename，消除拉取过程中的中断失败。日常承接多平台缺陷定位与修复。',
+    period: '2025.08 – 至今',
+    gradient: 'linear-gradient(150deg,#DDE4EF,#EDF1F7)',
+  },
   {
     chip: '独立开发',
     title: '在线聊天文件分享平台',
@@ -122,6 +133,7 @@ export type Note = {
 }
 
 export const notes: Note[] = [
+  { title: '基于 journald 的 coredump 捕获：车载日志系统的一次实践', state: '构思中' },
   { title: '粘包半包到底怎么解：一次完整的协议设计复盘', state: '构思中' },
   { title: '线程池为什么快：不只是"少创建几个线程"', state: '构思中' },
   { title: '文件去重：MD5 与 SHA 交叉校验的一点思考', state: '构思中' },

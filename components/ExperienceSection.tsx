@@ -8,8 +8,8 @@ export default function ExperienceSection() {
       <Reveal>
         <div className="sec-head">
           <div className="sec-label">Experience</div>
-          <h2>项目与实习</h2>
-          <p>两段实打实的经历，都写得出细节。</p>
+          <h2>经历</h2>
+          <p>三段实打实的经历，都写得出细节。</p>
         </div>
       </Reveal>
 
