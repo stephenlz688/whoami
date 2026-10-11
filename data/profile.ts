@@ -21,8 +21,9 @@ export const profile = {
     em: '扎实',
   },
   lead:
-    '我是李涛，C/C++ 开发，现在做座舱域中间件基础组件。之前维护过 OFD 版式文档 SDK 的 API，' +
-    '也独立写过聊天与网盘系统。喜欢把并发、内存、协议这些事拆开想清楚，再写成能长期跑的代码。',
+    '我是李涛，C/C++ 开发，在车载座舱域做中间件——日志采集、崩溃收集这类系统层的活，' +
+    '在意稳定和可用。之前维护过 OFD 版式文档 SDK，也独立写过聊天与网盘系统。' +
+    '喜欢把并发、内存、协议这些事拆开想清楚，再写成能长期跑的代码。',
   specs: [
     { label: '方向', value: 'C/C++ 开发' },
     { label: '侧重', value: '服务端 · 桌面客户端 · 中间件' },
@@ -65,8 +66,11 @@ export type ExperienceItem = {
   period: string
   /** 缩略图渐变，取自 design-spec.md 2.5 */
   gradient: string
+  /** 信息量大的卡占两列（当前工作、独立项目），类名加在 Reveal 容器上 */
+  wide?: boolean
 }
 
+/** 工作经历：在职 + 实习，按时间倒序 */
 export const experiences: ExperienceItem[] = [
   {
     chip: '在职',
@@ -78,14 +82,7 @@ export const experiences: ExperienceItem[] = [
       '取代对旧日志的全量 rename，消除拉取过程中的中断失败。日常承接多平台缺陷定位与修复。',
     period: '2025.08 – 至今',
     gradient: 'linear-gradient(150deg,#DDE4EF,#EDF1F7)',
-  },
-  {
-    chip: '独立开发',
-    title: '在线聊天文件分享平台',
-    role: 'C++ · Qt · QML · MySQL',
-    desc: '集社交聊天与网盘存储于一体的 C/S 系统。自研通信协议、线程池、文件哈希去重，解决了 TCP 粘包半包。',
-    period: '2024.06 – 2024.08',
-    gradient: 'linear-gradient(150deg,#DCE7F5,#EAF1F8)',
+    wide: true,
   },
   {
     chip: '实习',
@@ -94,6 +91,19 @@ export const experiences: ExperienceItem[] = [
     desc: '负责 API 维护与功能迭代，独立定位修复十余个关键 bug（含内存泄漏），后期主责电子发票插件。',
     period: '2024.10 – 2025.04',
     gradient: 'linear-gradient(150deg,#E2D9F0,#F0EBF8)',
+  },
+]
+
+/** 独立项目 */
+export const projects: ExperienceItem[] = [
+  {
+    chip: '独立开发',
+    title: '在线聊天文件分享平台',
+    role: 'C++ · Qt · QML · MySQL',
+    desc: '集社交聊天与网盘存储于一体的 C/S 系统。自研通信协议、线程池、文件哈希去重，解决了 TCP 粘包半包。',
+    period: '2024.06 – 2024.08',
+    gradient: 'linear-gradient(150deg,#DCE7F5,#EAF1F8)',
+    wide: true,
   },
 ]
 
