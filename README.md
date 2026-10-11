@@ -44,8 +44,9 @@ personal-site/
 │   ├── BackgroundOrbs    # 背景 4 个柔光色斑
 │   ├── Nav               # 吸顶毛玻璃导航
 │   ├── Hero              # 首屏 + 名片卡
+│   ├── QilinPet          # 首屏 3D 小麒麟（纯 CSS preserve-3d，跟随鼠标）
 │   ├── FocusSection      # 能力三卡
-│   ├── ExperienceSection # 项目与实习
+│   ├── ExperienceSection # 工作经历 + 项目（两组）
 │   ├── SkillsSection     # 技术栈四卡
 │   ├── NotesSection      # 技术笔记
 │   ├── AwardsSection     # 竞赛与荣誉
@@ -66,7 +67,7 @@ personal-site/
 - 改首屏标语 → `profile.headline` / `profile.lead`
 - 增删能力卡 → `focusItems`
 - **换能力卡的动物** → `focusItems[].icon`，可选 `octopus` / `cat` / `rabbit` / `bear` / `penguin` / `fox`
-- 增删项目或实习 → `experiences`（`gradient` 取值见 `design-spec.md` 2.5）
+- 增删工作 / 实习 → `experiences`；增删独立项目 → `projects`（`gradient` 取值见 `design-spec.md` 2.5；`wide: true` 让卡片占两列）
 - 增删技术栈分组 → `skillGroups`
 - 笔记写完了 → 把 `notes` 里对应项的 `state` 从 `'构思中'` 改成发布日期
 - 增删奖项 → `awards`

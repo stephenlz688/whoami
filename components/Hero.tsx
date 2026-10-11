@@ -1,5 +1,6 @@
 import { profile } from '@/data/profile'
 import Reveal from './Reveal'
+import QilinPet from './QilinPet'
 
 export default function Hero() {
   const { headline } = profile
@@ -89,6 +90,9 @@ export default function Hero() {
           </aside>
         </Reveal>
       </div>
+
+      {/* 3D 小麒麟：纯装饰，不进无障碍树；鼠标跟随写在组件内部 */}
+      <QilinPet />
 
       <div className="scroll-hint" aria-hidden="true">
         <span>向下</span>

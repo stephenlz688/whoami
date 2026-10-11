@@ -612,6 +612,16 @@ h1 em {
   gap: 20px;
 }
 
+/* 经历区拆成「工作经历 / 项目」两组后，第二组小标题的上方间距 */
+.sec-sub {
+  margin-top: 68px;
+}
+
+/* 信息量大的卡占两列（当前工作、独立项目）。Reveal 容器才是网格子项，类加在它身上 */
+.grid-work > .span-2 {
+  grid-column: span 2;
+}
+
 /* 光标跟随高光：坐标由 Spotlight 组件写进 --mx / --my */
 .spotlight {
   position: relative;
@@ -1051,6 +1061,10 @@ h1 em {
   .grid-work {
     grid-template-columns: 1fr;
   }
+  /* 单列布局下跨列没有意义，恢复自然占位 */
+  .grid-work > .span-2 {
+    grid-column: auto;
+  }
   .aw-list {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1102,6 +1116,365 @@ h1 em {
   .spotlight::before {
     --mx: 50%;
     --my: 30%;
+  }
+  /* 小麒麟完全静止：悬浮、呼吸、摇尾、眨眼、鼠标跟随全停 */
+  .pet-body,
+  .pet-shadow,
+  .q-head,
+  .q-mane,
+  .q-tail,
+  .q-eye {
+    animation: none;
+  }
+  .pet-body {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   19. 3D 小麒麟（首屏吉祥物）
+   纯 CSS preserve-3d，不引 WebGL。体积感来自每个部位的「背板 + 面板」厚度。
+   --px / --py 由 QilinPet.tsx 跟随鼠标写入，-1 ~ 1。
+   ============================================================ */
+.pet {
+  position: absolute;
+  right: 4.5%;
+  bottom: 86px;
+  z-index: 2;
+  width: 132px;
+  height: 148px;
+  pointer-events: none;
+  --px: 0;
+  --py: 0;
+  /* 转向幅度随鼠标位置轻微偏移，最大 ±14° */
+  --tilt-x: calc(var(--py) * -9deg);
+  --tilt-y: calc(var(--px) * 14deg);
+}
+
+.pet-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 620px;
+  perspective-origin: 50% 42%;
+  transform-style: preserve-3d;
+}
+
+/* 落地影：跟着身体一起呼吸，但不吃 3D 倾斜，保持贴地 */
+.pet-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 96px;
+  height: 15px;
+  margin-left: -48px;
+  border-radius: 50%;
+  background: rgba(61, 74, 87, 0.09);
+  filter: blur(4px);
+  animation: pet-shadow 3.6s var(--ease) infinite;
+}
+
+.pet-body {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 0.6s var(--ease);
+  animation: pet-float 3.6s var(--ease) infinite;
+}
+
+/* ---- 通用部位：面板在前、背板在后，靠 translateZ 拉开厚度 ---- */
+.pet i,
+.pet b,
+.pet em {
+  position: absolute;
+  display: block;
+  font-style: normal;
+}
+
+/* ========== 躯干 ========== */
+.q-torso {
+  left: 22px;
+  top: 62px;
+  width: 92px;
+  height: 54px;
+  transform-style: preserve-3d;
+}
+.q-torso i {
+  inset: 0;
+  border-radius: 50%;
+}
+/* 背板：暗一档，制造厚度 */
+.q-torso-back {
+  background: #cfe0d8;
+  transform: translateZ(-16px);
+}
+/* 面板：主色 + 顶部柔光，跟规范的「光在背后」思路一致 */
+.q-torso-front {
+  background: #e4efe9;
+  box-shadow:
+    inset 0 6px 12px rgba(255, 255, 255, 0.85),
+    inset 0 -5px 10px rgba(61, 74, 87, 0.05);
+  transform: translateZ(4px);
+}
+/* 肚皮浅色块 */
+.q-torso-belly {
+  width: 44px;
+  height: 34px;
+  left: 26px;
+  top: 14px;
+  border-radius: 50%;
+  background: #f4f8f6;
+  transform: translateZ(9px);
+}
+
+/* ========== 腿 ========== */
+.q-legs {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.q-leg {
+  width: 15px;
+  height: 34px;
+  top: 108px;
+  border-radius: 8px 8px 6px 6px;
+  background: #e4efe9;
+  box-shadow: inset 0 -6px 8px rgba(61, 74, 87, 0.06);
+}
+/* 蹄 */
+.q-leg::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 9px;
+  border-radius: 0 0 6px 6px;
+  background: #f5e4cd;
+}
+/* 后腿偏暗，制造前后纵深 */
+.q-leg-bl,
+.q-leg-br {
+  background: #d5e6de;
+}
+.q-leg-fl { left: 34px; transform: translateZ(6px); }
+.q-leg-fr { left: 88px; transform: translateZ(6px); }
+.q-leg-bl { left: 40px; transform: translateZ(-12px); }
+.q-leg-br { left: 94px; transform: translateZ(-12px); }
+
+/* ========== 颈 + 鬃 ========== */
+.q-neck {
+  left: 24px;
+  top: 42px;
+  width: 34px;
+  height: 34px;
+  transform-style: preserve-3d;
+}
+.q-neck i {
+  inset: 0;
+  border-radius: 50%;
+}
+.q-neck-back {
+  background: #cfe0d8;
+  transform: translateZ(-12px);
+}
+.q-neck-front {
+  background: #e4efe9;
+  transform: translateZ(4px);
+}
+
+/* 鬃毛：三片圆叶叠出来，不画复杂路径 */
+.q-mane {
+  left: 20px;
+  top: 24px;
+  width: 42px;
+  height: 46px;
+  transform-style: preserve-3d;
+  animation: pet-mane 3.6s var(--ease) infinite;
+}
+.q-mane i {
+  border-radius: 50%;
+  background: #b9dcd0;
+}
+.q-mane-back {
+  inset: 0;
+  transform: translateZ(-10px);
+}
+.q-mane-front {
+  inset: 4px 6px 4px 8px;
+  background: #cfe9de;
+  transform: translateZ(8px);
+}
+
+/* ========== 头 ========== */
+.q-head {
+  left: 32px;
+  top: 14px;
+  width: 46px;
+  height: 42px;
+  transform-style: preserve-3d;
+  animation: pet-head 3.6s var(--ease) infinite;
+}
+.q-skull,
+.q-skull-back {
+  inset: 0;
+  border-radius: 50%;
+}
+.q-skull-back {
+  background: #cfe0d8;
+  transform: translateZ(-14px);
+}
+.q-skull {
+  background: #e4efe9;
+  box-shadow:
+    inset 0 5px 10px rgba(255, 255, 255, 0.9),
+    inset 0 -4px 8px rgba(61, 74, 87, 0.05);
+  transform: translateZ(6px);
+}
+
+/* 眼：唯一允许出现深色 #3D4A57 的地方 */
+.q-eye {
+  top: 17px;
+  width: 5px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3d4a57;
+  transform: translateZ(11px);
+  animation: pet-blink 4.4s var(--ease) infinite;
+}
+.q-eye-l { left: 11px; }
+.q-eye-r { left: 30px; }
+
+/* 腮红：统一 #EFA8B2，透明度 0.55–0.6 */
+.q-blush {
+  top: 24px;
+  width: 9px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(239, 168, 178, 0.58);
+  transform: translateZ(11px);
+}
+.q-blush-l { left: 5px; }
+.q-blush-r { left: 32px; }
+
+/* 口鼻 */
+.q-muzzle {
+  left: 15px;
+  top: 26px;
+  width: 17px;
+  height: 13px;
+  border-radius: 50%;
+  background: #f4f8f6;
+  transform: translateZ(12px);
+}
+.q-nose {
+  left: 5px;
+  top: 2px;
+  width: 7px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3d4a57;
+  transform: translateZ(2px);
+}
+.q-mouth {
+  left: 4px;
+  top: 9px;
+  width: 9px;
+  height: 4px;
+  border-bottom: 1.5px solid #3d4a57;
+  border-radius: 0 0 50% 50%;
+  transform: translateZ(2px);
+}
+
+/* 耳 */
+.q-ear {
+  top: -3px;
+  width: 13px;
+  height: 15px;
+  border-radius: 50%;
+  background: #cfe9de;
+  transform: translateZ(2px);
+}
+.q-ear-l { left: 1px; transform: translateZ(2px) rotate(-18deg); }
+.q-ear-r { left: 32px; transform: translateZ(2px) rotate(18deg); }
+
+/* 角：细长椭圆旋出来，小麒麟的标志 */
+.q-horn {
+  top: -16px;
+  width: 6px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f5e4cd;
+  transform-origin: 50% 100%;
+}
+.q-horn-l { left: 8px; transform: translateZ(4px) rotate(-14deg); }
+.q-horn-r { left: 32px; transform: translateZ(4px) rotate(14deg); }
+
+/* ========== 尾 ========== */
+.q-tail {
+  left: 6px;
+  top: 70px;
+  width: 26px;
+  height: 26px;
+  transform-style: preserve-3d;
+  transform-origin: 90% 70%;
+  animation: pet-tail 2.8s var(--ease) infinite;
+}
+.q-tail i {
+  border-radius: 50%;
+}
+.q-tail-a {
+  inset: 0;
+  background: #cfe9de;
+  transform: translateZ(-6px);
+}
+.q-tail-b {
+  inset: 5px;
+  background: #f5e4cd;
+  transform: translateZ(4px);
+}
+
+/* ---- 动画 ---- */
+@keyframes pet-float {
+  0%, 100% { transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(0); }
+  50% { transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(-7px); }
+}
+@keyframes pet-shadow {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(0.86); opacity: 0.6; }
+}
+@keyframes pet-head {
+  0%, 100% { transform: translateZ(6px) rotate(0deg); }
+  30% { transform: translateZ(6px) rotate(-4deg); }
+  60% { transform: translateZ(6px) rotate(3deg); }
+}
+@keyframes pet-mane {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-2.5deg); }
+}
+@keyframes pet-tail {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(14deg); }
+}
+@keyframes pet-blink {
+  0%, 92%, 100% { transform: translateZ(11px) scaleY(1); }
+  95% { transform: translateZ(11px) scaleY(0.1); }
+}
+
+/* 窄屏缩小，避免压住标题和名片 */
+@media (max-width: 900px) {
+  .pet {
+    right: 3%;
+    bottom: 40px;
+    width: 104px;
+    height: 118px;
+  }
+}
+@media (max-width: 620px) {
+  /* 手机上首屏本来就满，直接不显示，留白比拥挤好 */
+  .pet {
+    display: none;
   }
 }
 
