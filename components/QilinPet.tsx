@@ -1,108 +1,74 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import Script from 'next/script'
 
 /**
- * 首屏 3D 小麒麟。
+ * 首屏 3D 小麒麟（真 GLB 模型，可拖动旋转）。
  *
- * 刻意不用 WebGL / three.js：这套设计全靠 backdrop-filter 和半透明叠色，
- * 塞一个重引擎进来性价比太低。这里用 CSS `transform-style: preserve-3d`
- * 拼几何体——每个部位是「正面 + 背面偏移」两层，转动时有真实视差，
- * 体积感来自厚度而不是光照。
+ * 用 model-viewer 渲染：它内置 WebGL 相机控制，拖动即转、滚轮即缩放，
+ * 不需要自己写 three.js 的轨道控制器。bundle 已下载到 public/本地加载，
+ * 不走 CDN——GitHub Pages 在国内访问 Google CDN 不稳。
  *
- * 约束（design-spec.md 七、九、十）：
- * - 几何只用圆和椭圆
- * - 深色 #3D4A57 只出现在眼睛
- * - 腮红统一 #EFA8B2
- * - 所有动效只用一个缓动曲线
- * - 鼠标坐标写 CSS 变量，不进 React state
- * - prefers-reduced-motion 下完全静止
+ * 约束（design-spec.md 七、十）：
+ * - 静态站是 output:'export'，模型放 public/ 走裸绝对路径，要手拼 basePath
+ * - aria-hidden：纯装饰，不进无障碍树
+ * - prefers-reduced-motion 下关掉自动旋转与入场
+ * - 隐藏原生的「拖动提示」角标，改用自己的玻璃提示条
  */
 export default function QilinPet() {
-  const ref = useRef<HTMLDivElement>(null)
+  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+  const wrap = useRef<HTMLDivElement>(null)
+  const [ready, setReady] = useState(false)
+  // 系统开了「减少动态效果」就不自动转，但保留手动拖动
+  const [calm, setCalm] = useState(false)
 
+  // 脚本加载完再挂模型；web component 升级失败就保持隐藏，不留空白
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    // 系统开了「减少动态效果」就别跟鼠标了
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    setCalm(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
 
-    let ticking = false
-    const onMove = (e: PointerEvent) => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(() => {
-        // 归一化到 -1 ~ 1，限幅避免边缘处转过头
-        const nx = (e.clientX / window.innerWidth - 0.5) * 2
-        const ny = (e.clientY / window.innerHeight - 0.5) * 2
-        const cx = Math.max(-1, Math.min(1, nx))
-        const cy = Math.max(-1, Math.min(1, ny))
-        el.style.setProperty('--px', cx.toFixed(3))
-        el.style.setProperty('--py', cy.toFixed(3))
-        ticking = false
-      })
+    const check = () => {
+      if (customElements.get('model-viewer')) setReady(true)
     }
-
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onMove)
+    check()
+    const t = setInterval(check, 200)
+    const stop = setTimeout(() => clearInterval(t), 10000)
+    return () => {
+      clearInterval(t)
+      clearTimeout(stop)
+    }
   }, [])
 
   return (
-    <div className="pet" ref={ref} aria-hidden="true">
-      <div className="pet-stage">
-        <div className="pet-shadow" />
-        <div className="pet-body">
-          {/* 尾巴 */}
-          <div className="q-tail">
-            <i className="q-tail-a" />
-            <i className="q-tail-b" />
-          </div>
+    <>
+      <Script src={`${base}/model-viewer.min.js`} strategy="afterInteractive" />
 
-          {/* 四条腿 */}
-          <div className="q-legs">
-            <i className="q-leg q-leg-bl" />
-            <i className="q-leg q-leg-fl" />
-            <i className="q-leg q-leg-br" />
-            <i className="q-leg q-leg-fr" />
-          </div>
+      <div
+        ref={wrap}
+        className={`pet3d${ready ? ' is-ready' : ''}`}
+        aria-hidden="true"
+      >
+        <model-viewer
+          className="pet3d-mv"
+          src={`${base}/qilin.glb`}
+          alt="一只可爱的薄荷绿小麒麟手办"
+          camera-controls=""
+          interaction-prompt="none"
+          {...(calm
+            ? {}
+            : { 'auto-rotate': '', 'rotation-per-second': '18deg' })}
+          camera-orbit="35deg 72deg 105%"
+          shadow-intensity="0.5"
+          shadow-softness="0.9"
+          exposure="1.05"
+          environment-image="neutral"
+          interaction-prompt-style="none"
+          touch-action="none"
+        />
 
-          {/* 躯干 */}
-          <div className="q-torso">
-            <i className="q-torso-back" />
-            <i className="q-torso-belly" />
-            <i className="q-torso-front" />
-          </div>
-
-          {/* 颈与鬃 */}
-          <div className="q-neck">
-            <i className="q-neck-back" />
-            <i className="q-neck-front" />
-          </div>
-          <div className="q-mane">
-            <i className="q-mane-back" />
-            <i className="q-mane-front" />
-          </div>
-
-          {/* 头 */}
-          <div className="q-head">
-            <i className="q-ear q-ear-l" />
-            <i className="q-ear q-ear-r" />
-            <i className="q-horn q-horn-l" />
-            <i className="q-horn q-horn-r" />
-            <i className="q-skull-back" />
-            <i className="q-skull">
-              <b className="q-eye q-eye-l" />
-              <b className="q-eye q-eye-r" />
-              <b className="q-blush q-blush-l" />
-              <b className="q-blush q-blush-r" />
-              <b className="q-muzzle">
-                <em className="q-nose" />
-                <em className="q-mouth" />
-              </b>
-            </i>
-          </div>
-        </div>
+        {/* 拖动提示：model-viewer 自带的角标不符合这套设计的调性，自己写一个 */}
+        <span className="pet3d-tip">拖动转一转</span>
       </div>
-    </div>
+    </>
   )
 }

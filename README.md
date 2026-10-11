@@ -202,6 +202,28 @@ FF="D:/tools/node_modules/ffmpeg-static/ffmpeg.exe"
 
 **两个坑**：ffmpeg 是原生 Windows 程序，路径要写 `D:/...` 而不是 `/d/...`；`.gitignore` 里没有忽略 mp4，这两个文件会正常提交（加起来不到 1 MB，不影响仓库）。
 
+## 首屏 3D 小麒麟
+
+首屏右下角有一只可拖动旋转的小麒麟，用 [model-viewer](https://modelviewer.dev)渲染真 GLB 模型。
+
+| 文件 | 说明 |
+|---|---|
+| `public/qilin.glb` | 模型本体，**186 KB** |
+| `public/model-viewer.min.js` |渲染器，1.04 MB，**本地存放不走 CDN** |
+
+**为什么 bundle 要本地化**：`npm install @google/model-viewer` 在本机装不上（npm registry 长时间无响应），而且 GitHub Pages 在国内访问 unpkg / Google CDN 并不稳。直接把 `dist/model-viewer.min.js` 下载到 `public/`，用 `next/script` 的 `afterInteractive` 策略加载，既绕开网络问题也能配合 `/whoami` basePath。
+
+**模型是怎么压到186 KB 的**：文生 3D 产出的原始 GLB 有 **27.9 MB**，其中 27 MB 是三张 4096×4096 的未压缩 PNG 贴图。压缩脚本做两件事——每张贴图缩到最长边 1024 转 JPEG q82（圆润手办质感，压缩损失肉眼不可见），然后重算所有 `bufferView` 偏移重新打包。**27.91 MB → 0.18 MB，缩小约 150倍。**
+
+> 重新压缩用工作区根目录的 `compress_glb.py`（纯标准库 + Pillow）。
+> 注意 glTF 规范要求 JSON chunk 用空格 `0x20` 填充、binary chunk 用 null `0x00`，写错会让解析器直接报JSON 错误。
+
+**交互**：`camera-controls` 让拖动即转、滚轮即缩放；`auto-rotate` 让它平时自己慢慢转（18°/秒），拖动时会自动暂停；`interaction-prompt="none"` 关掉它自带的角标提示，改用自己写的玻璃胶囊提示条（`.pet3d-tip`）。
+
+**类型声明**：`<model-viewer>` 是 Web Component，TS 不认识，在 `types/model-viewer.d.ts` 里补了声明。注意 React 18+ 的 JSX 命名空间挂在 `react` 上（`declare module 'react' { namespace JSX {} }`），声明全局 `JSX` 不生效。另外 JSX 里要用 `className` 而非原生 `class`，否则类型报错。
+
+**降级**：脚本和模型都没就绪前容器 `visibility: hidden`，避免留一块空白；`prefers-reduced-motion` 下关掉提示条呼吸与自动旋转（组件侧通过 `auto-rotate` 属性在 JS 里判断后移除）。900px 缩小、620px 直接隐藏。
+
 ## 部署
 
 代码推到 GitHub 后会**自动部署**，不用手动操作。
