@@ -33,12 +33,15 @@ export default function QilinPet() {
     // 动态 import：three 是 ESM 且不参与 Next 打包，按需从 public/ 加载
     ;(async () => {
       try {
-        const THREE: any = await import(/* webpackIgnore: true */ `${base}/three.module.min.js`)
+        const THREE: any = await import(
+          /* webpackIgnore: true */ `${base}/three.module.min.js`
+        )
         if (disposed) return
         const { GLTFLoader } = await import(
           /* webpackIgnore: true */ `${base}/gltf-loader.js` as any
         )
         if (disposed || !GLTFLoader) {
+          console.warn('[qilin] GLTFLoader 不可用')
           setFailed(true)
           return
         }
@@ -54,7 +57,8 @@ export default function QilinPet() {
         let renderer: any
         try {
           renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-        } catch {
+        } catch (e) {
+          console.warn('[qilin] WebGL 初始化失败', e)
           setFailed(true)
           return
         }
@@ -107,7 +111,10 @@ export default function QilinPet() {
             setReady(true)
           },
           undefined,
-          () => !disposed && setFailed(true)
+          (e: any) => {
+            console.error('[qilin] 模型加载失败', e)
+            if (!disposed) setFailed(true)
+          }
         )
 
         // ---------- 交互：拖动旋转 + 滚轮缩放 ----------
@@ -196,7 +203,8 @@ export default function QilinPet() {
           renderer.dispose()
           if (canvas.parentNode === el) el.removeChild(canvas)
         }
-      } catch {
+      } catch (e) {
+        console.error('[qilin] 初始化异常', e)
         if (!disposed) setFailed(true)
       }
     })()
@@ -210,15 +218,18 @@ export default function QilinPet() {
   return (
     <div
       ref={host}
-      className={`pet3d${ready ? ' is-ready' : ''}`}
+      className={`pet3d${ready ? ' is-ready' : ''}${failed ? ' is-failed' : ''}`}
       aria-hidden="true"
     >
-      {!failed && (
-        <span className="pet3d-tip">
-          {ready ? '拖动转一转' : '正在唤醒…'}
+      {failed ? (
+        <span className="pet3d-tip is-off">
+          3D 加载失败
+          <br />
+          按 F12 看控制台
         </span>
+      ) : (
+        <span className="pet3d-tip">{ready ? '拖动转一转' : '正在唤醒…'}</span>
       )}
-      {failed && <span className="pet3d-tip is-off">3D 模型加载失败</span>}
     </div>
   )
 }
